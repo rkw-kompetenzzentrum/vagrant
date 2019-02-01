@@ -68,17 +68,18 @@ Vagrant.configure("2") do |config|
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
-  config.vm.network "public_network", type: "dhcp"
+  # config.vm.network "public_network", type: "dhcp"
 
   # Share an additional folder to the guest VM. The first argument is
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
-  config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
-
+  # config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
+  config.vm.synced_folder "../www", "/var/www", mount_options: ['rw', 'vers=3', 'tcp', 'fsc', 'actimeo=2'], nfs: true
   config.nfs.map_uid = 501
   config.nfs.map_gid = 210
+
   # config.vm.synced_folder "../www", "/var/www", mount_options: ["dmode=777", "fmode=776"]
 
   # Provider-specific configuration so you can fine-tune various
