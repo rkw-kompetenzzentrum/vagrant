@@ -31,12 +31,25 @@ sudo -i
 chown -R vagrant:vagrant www
 ```
 
-4.) Now restart the vHost 
+4.) Now restart the VM 
 
 
+## Using this repository
 
+### The simple way
+Everything in www will be mounted to your Vagrant VM and is used as DocumentRoot for Apache.
+This Vagrant VM is configured to run with PHP-FPM with several PHP Versions. Just copy your project folder into
+the corresponding folder and set a symlink named `public_html` on your project folder.
 
+Example:
+- You want to add a project using PHP 7.2
+- Create a folder `my_project` in `www/5.6` and set a symlink named `public_html` on your project folder
+```
+mkdir www/my_project
+ln -s www/my_project public_html
+```
 
+### The expert way
 
 
 - Before provising your vagrant VM, make sure `/www` is owned by your local vagrant user

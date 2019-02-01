@@ -340,16 +340,14 @@ Vagrant.configure("2") do |config|
     if [ -f "/lib/systemd/system/varnish.service" ]; then
         rm /lib/systemd/system/varnish.service
     fi
-
     ln -s /vagrant/configuration/lib/systemd/system/varnish.service /lib/systemd/system/varnish.service
 
     rm -r /etc/varnish
-    ln -s /vagrant/configuration/configuration/etc/varnish/ /etc/varnish
+    ln -s /vagrant/configuration/etc/varnish/ /etc/varnish
     chmod 644 /etc/varnish/*.vcl
 
     systemctl daemon-reload
 
-exit;
 
     echo "======================================================"
     echo "Installing Postfix..."
@@ -377,18 +375,13 @@ exit;
         echo "Installing Mailcatcher..."
         gem install mailcatcher
 
-        echo "Setting up Mailcatcher daemon"
-        echo "[Unit]" >> /lib/systemd/system/mailcatcher.service
-        echo "Description=Mailcatcher Service" >> /lib/systemd/system/mailcatcher.service
-        echo "After=network.service vagrant.mount" >> /lib/systemd/system/mailcatcher.service
-        echo "[Service]" >> /lib/systemd/system/mailcatcher.service
-        echo "Type=simple" >> /lib/systemd/system/mailcatcher.service
-        echo "ExecStart=/usr/local/bin/mailcatcher --foreground --ip 0.0.0.0" >> /lib/systemd/system/mailcatcher.service
-        echo "Restart=always" >> /lib/systemd/system/mailcatcher.service
-        echo "[Install]" >> /lib/systemd/system/mailcatcher.service
-        echo "WantedBy=multi-user.target" >> /lib/systemd/system/mailcatcher.service
-
+        echo "Set symlinks to configuration files..."
+        if [ -f "/lib/systemd/system/mailcatcher.service" ]; then
+            rm /lib/systemd/system/mailcatcher.service
+        fi
+        ln -s /vagrant/configuration/lib/systemd/system/mailcatcher.service /lib/systemd/system/mailcatcher.service
         systemctl enable mailcatcher
+
     else
         echo "Mailcatcher already installed. Skipped."
     fi
@@ -409,9 +402,6 @@ exit;
 
     echo "...PHP 7.2..."
     service php7.2-fpm start
-
-    echo "...OrientDb..."
-    service orientdb start
 
     echo "...Postfix..."
     service postfix start
