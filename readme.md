@@ -4,85 +4,211 @@
 - Virtualbox, Version >= 5
 - Vagrant, Version >=2
 
+## About the folders
+
+### Folder `vagrant`
+This folder contains the Vagrantfile and a configuration-folder which is used to setup the Vagrant-VM on provisioning.
+
+### Folder `www`
+This is the folder where you put your projects. It is used as mountpoint for Vagrant and thus can be reached via your host machine. 
+The content of this folder (except for `www/default` and `www/hmtl`) is NOT versioned.
+
+
 ## Before you start
-If you use NFS, Vagrant maps the user of the guest (`vagrant` with the UID 1000) to the same UID of the host. 
+
+### Using a proxy
+
+During provisioning software will be installed using `apt-get`. 
+So if you are using an internal proxy, please start the Vagrant-VM **WITHOUT** provision-flag first and configure your connection via proxy by editing the `/etc/environment` in the Vagrant-VM.
+```
+host$ cd vagrant
+host$ vagrant up
+host$ vagrant ssh
+vm$ sudo nano /etc/environment
+```
+Here you insert the following (replace your proxy-settings accordingly):
+```
+http_proxy="http://[YOUR-PROXY]:[YOUR-PORT]/"
+https_proxy="http://[YOUR-PROXY]:[YOUR-PORT]/"
+ftp_proxy="http://[YOUR-PROXY]:[YOUR-PORT]/"
+HTTP_PROXY="http://[YOUR-PROXY]:[YOUR-PORT]/"
+HTTPS_PROXY="http://[YOUR-PROXY]:[YOUR-PORT]/"
+FTP_PROXY="http://[YOUR-PROXY]:[YOUR-PORT]/"
+```
+Then halt the Vagrant VM... 
+```
+vm$ exit
+vm$ exit
+host$ vagrant halt
+```
+...and start it again with provision-flag (see below).
+
+### Permissions with NFS
+If you use NFS (recommended for performance), Vagrant maps the user and group of the guest (`vagrant` with the UID 1000) to the same UIDs on the host. 
 In most cases this works fine. But if you have more than one user on the host it may happen that the UIDs do not match. 
 This causes problems with read and write permissions. 
 
 
 
-Let's assume the UID 1000 is still free on your host (if not, you have to set the UID in step 2 accordingly!)
-
-1.) Create the new user on host 
+Let's assume your host-user has the UID 502 and it's group has the UID 20.
+Then we uncomment the following lines to the Vagrantfile and enter the UIDs accordingly.
 ```
-useradd -u 1000 vagrant
-```
-
-2.) Then we uncomment the following lines to the Vagrantfile, so that NFS is mapped to the UID 1000 
-(and so that the vHost user also grabs the vagrant-user) 
-```
-config.nfs.map_uid = 1000
-config.nfs.map_gid = 1000
+config.nfs.map_uid = 501
+config.nfs.map_gid = 20
 ```
  
-3.) Now we set the www-folder in this repository on the host to the matching user 
+Now we set the www-folder in this repository on the host to the matching user (if not already)
 ```
-sudo -i
-chown -R vagrant:vagrant www
-```
-
-4.) Now restart the VM 
-
-
-## Using this repository
-
-### The simple way
-Everything in www will be mounted to your Vagrant VM and is used as DocumentRoot for Apache.
-This Vagrant VM is configured to run with PHP-FPM with several PHP Versions. Just copy your project folder into
-the corresponding folder and set a symlink named `public_html` on your project folder.
-
-Example:
-- You want to add a project using PHP 7.2
-- Create a folder `my_project` in `www/5.6` and set a symlink named `public_html` on your project folder
-```
-mkdir www/my_project
-ln -s www/my_project public_html
+host$ sudo chown -R my-user:my-group www
 ```
 
-### The expert way
-
-
-- Before provising your vagrant VM, make sure `/www` is owned by your local vagrant user
+## Provisioning and initial setup
+You can do the provisioning of this Vagrant-VM by
+```
+host$ cd vagrant
+host$ vagrant up --provision
 ```
 
+Provisioning will install (and update the configuration of):
+* Apache 2
+* PHP (as PHP-FPM with versions 5.6, 7.0 and 7.2)
+* MySQL
+* PHPMyAdmin
+* Varnish-Cache
+* Postfix
+* Mailcatcher
+
+
+## Passwords
+* Root-password for Mysql on the VM is set to `rkw`
+
+## Getting started with projects
+
+### Introduction
+Place your own projects in `www/[YOUR_PROJECT]`. 
+
+Do this e.g. by cloning your project GIT into your project-folder.
+
+The folder `www` is used as a mountpoint for Vagrant and thus can be reached via your host machine.
+This way you can work on your project with your favorite editors and programms on your host machine, while the Vagrant VM brings a fully configured webserver to you for development and testing.  
+
+The content of the folder `www` is NOT versioned (except for `www/default` and `www/hmtl`, which are defaults that shouldn't be touched by you) .
+
+### Step-by-step
+#### Step 1
+Place your own project in `www/[YOUR-PROJECT]`. 
+```
+host$ cd www
+host$ mkdir my-project
+host$ cd my-project
+host$ git init
+...
+```
+#### Step 2
+Now you have to tell Apache
+a) were the DocumentRoot of your project is and
+b) which PHP Version you want to use.
+
+Login into you Vagrant VM and add a new vHost configuration for your project by copying the defaults-file.
+```
+host$ cd vagrant
+host$ vagrant ssh
+vm$ sudo -i
+vm$ cd /etc/apache2/sites-available
+vm$ cp 000-default.conf my-project.conf
 ```
 
-1. Create a folder for the project, e.g. /var/projects/rkw-kompetenzzentrum.de
-2. Copy "www" and "vagrant" from this ZIP-file into it, so that you get the following folder structure - DO NOT RENAME ANYTHING INCLUDED IN THIS ZIP-FILE!
-  /var/projects/
-  --> rkw-kompetenzzentrum.de
-  ----> vagrant
-  ----> www
-3. Make sure the folder vagrant/ssh contains the required RSA-Keys 
-4. Make sure the folder vagrant contains der Vagrantfile
-5. Do "cd vagrant" in vagrant
-6. Enter "vagrant up" - NOTE: Per default NFS for shared folders is used (see vagrantfile). This requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html), so stay tuned until Vagrant asks for your password!
-7. Go get some coffee when the provisioning-script starts - it may take some time to download everything at the first time
-8. Use the etc-host.txt and copy it into your /etc/hosts to let your host know which domains should be looked up against your VM. Don’t forget to change the IP to the one used by your VM.  
+Then we edit the new file with
+```
+vm$ nano my-project.conf
+```
 
-Notes
-========
-- If you are using an local vagrant-box, download it and add it with: "vagrant box add INTERNAL-NAME-OF-BOX PATH/FILE"
-- If you are using an internal proxy you need to exit the provising-script at the begining and setup the proxy in your VM. You can do this by editing /etc/environment.
-Please note that you need both, lower- and uppercase versions of the variables. Then do "vagrant up --provision".
-	http_proxy="http://myproxy.server.com:8080/"
-	https_proxy="http://myproxy.server.com:8080/"
-	ftp_proxy="http://myproxy.server.com:8080/"
-	HTTP_PROXY="http://myproxy.server.com:8080/"
-	HTTPS_PROXY="http://myproxy.server.com:8080/"
-	FTP_PROXY="http://myproxy.server.com:8080/"
+Let's take a closer look at the configuration:
+```
+<VirtualHost *:8080>
 
-- You can use the etc-host.txt and copy it into your /etc/hosts to let your host know which domains should be looked up against your VM. Don’t forget to change the IP to the one used by your VM. 
-- You can find out which IP your VM is using by calling 'netstat -rn' on your host and locking for the IP in 'vboxnet' after your VM has booted.
-- If you are using an internal proxy you need to exclude the IP of you guest maschine from the lookup via proxy in your browser  
-  
+    ServerAdmin webmaster@vagrant.local
+    # ServerName example.com
+    # ServerAlias www.example.com
+
+    # Set basic configuration
+    Use vHostPhpFcgi 5.6 default
+
+    # Add PhpMyAdmin
+    Use vHostExtPhpmyadminFcgi 
+
+</VirtualHost>
+```
+* The first line `<VirtualHost *:8080>` sets the port. We use 8080 here, because we have a varnish installed. Nothing to do here
+* `ServerAdmin webmaster@vagrant.local` is an obligatory line. You can leave it as it is.
+* The next two lines are commented out in the default file, because the default file is meant to be a fallback. **For your own projects you have to define at least a `ServerName`, so that Apache knows which configuration should be used for which domain.**
+* `ServerAlias` is optional and contains further domains that are to be handled by this configuration. You can use as many ServerAlias entries as you like, one for each domain. You can also use wildcards, e.g. `*.example.com` to indicate that this configuration is to be used for all subdomains of example.com.
+* **Now there comes the important stuff:** `Use vHostPhpFcgi 5.6 default`. Here `vHostPhpFcgi` refers to the configuration macro in `/etc/apache/conf-available` that is to be used - dont't mind, just keep it as it is :-) The second param defines the PHP-Version you want to use. Valid values are: `5.6, 7.0, 7.2`. The third param defines the path to the public DocumentRoot of your project, relative to `www`, e.g. `my-project/web`.  
+* vHostExtPhpmyadminFcgi simple activates PHPMyadmin for your project - just leave it as it is.
+
+Taken this together a configuration for you project could look like this:
+```
+<VirtualHost *:8080>
+
+    ServerAdmin webmaster@vagrant.local
+    ServerName my-project.local
+    ServerAlias www.my-project.local
+    ServerAlias www.landingpage-for-my-project.local
+
+    # Set basic configuration - using PHP 7.2 and using (www/)my-project/web as DocumentRoot
+    Use vHostPhpFcgi 7.2 my-project/web
+
+    # Add PhpMyAdmin
+    Use vHostExtPhpmyadminFcgi 
+
+</VirtualHost>
+```
+
+Now we have to restart apache
+```
+vm$ service apache2 restart
+```
+
+#### Step 3
+Use the `etc/hosts` on your host to route your project's local domains from your host to the IP of your Vagrant VM.
+ou can find out which IP your VM is using by calling 
+```
+host$ netstat -rn
+```
+on your host and locking for the IP in `vboxnet`.
+
+```
+host$ sudo nano /etc/host
+```
+
+Set the IPs accordingly in your etc/hosts
+
+```
+172.28.128.3	your-project.local
+172.28.128.3	www.your-project.local
+172.28.128.3	www.landingpage-for-my-project.local
+``` 
+
+#### Step 4
+Your are ready :-)
+
+* Go to `http://your-project.local` to reach your project's DocumentRoot via Apache
+* Go to `http://your-project.local/phpmadmin` to call PhpMyAdmin in your project
+* Go to `http://your-project.local:1080` to look into all e-mails that have been sent by your VM"
+
+
+ # Troubleshooting
+ ## On Mac
+ Sometimes the NFS-directories simply don't mount.
+ If you do a
+  ````
+ host$ vagrant up --debug
+   ````
+ you probably get the following messages:
+ ````
+ DEBUG ssh: stderr: ttyname failed
+ DEBUG ssh: stderr: Inappropriate ioctl for device
+ ````
+ 
+ This may be the case because of wrong entries in `/etc/export`, especially when you use more than one VM on your host.
+ Just remove the relevant entries from `/etc/export` and start your VM again.

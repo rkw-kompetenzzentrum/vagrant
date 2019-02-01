@@ -1,8 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 #
-# Vagrantfile for rkw-kompetenzzentrum.de
-# Version: 1.0.4
+# Vagrantfile
+# Version: 1.0.5
 # Author: Steffen Kroggel
 #
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -20,7 +20,8 @@ Vagrant.configure("2") do |config|
   # we use ubuntu/xenial64
   # if you need a local box, go to http://cloud-images.ubuntu.com and 
   # download the vagrant.box-file manually
-  config.vm.box = "local-xenial"
+  # config.vm.box = "local-xenial"
+  config.vm.box = "ubuntu/xenial64"
 
   # Set higher value for longer bootime
   config.vm.boot_timeout = 600
@@ -76,8 +77,8 @@ Vagrant.configure("2") do |config|
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
   config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
 
-  config.nfs.map_uid = 1000
-  config.nfs.map_gid = 1000
+  config.nfs.map_uid = 501
+  config.nfs.map_gid = 210
   # config.vm.synced_folder "../www", "/var/www", mount_options: ["dmode=777", "fmode=776"]
 
   # Provider-specific configuration so you can fine-tune various
@@ -145,19 +146,19 @@ Vagrant.configure("2") do |config|
     echo "Set symlinks to configuration files..."
     cd /etc/apache2
     rm -r conf-available
-    ln -s /vagrant/configuration/etc/apache2/conf-available conf-available
+    cp -r /vagrant/configuration/etc/apache2/conf-available conf-available
 
     rm -r sites-available
-    ln -s /vagrant/configuration/etc/apache2/sites-available sites-available
+    cp -r /vagrant/configuration/etc/apache2/sites-available sites-available
 
     rm apache2.conf
-    ln -s /vagrant/configuration/etc/apache2/apache2.conf apache2.conf
+    cp /vagrant/configuration/etc/apache2/apache2.conf apache2.conf
 
     rm envvars
-    ln -s /vagrant/configuration/etc/apache2/envvars envvars
+    cp /vagrant/configuration/etc/apache2/envvars envvars
 
     rm ports.conf
-    ln -s /vagrant/configuration/etc/apache2/ports.conf ports.conf
+    cp /vagrant/configuration/etc/apache2/ports.conf ports.conf
 
     echo "Enabling/Disabling modules..."
     a2enmod expires
@@ -197,7 +198,7 @@ Vagrant.configure("2") do |config|
     echo "Set symlinks to configuration files..."
     cd /etc/mysql
     rm mysql.cnf
-    ln -s /vagrant/configuration/etc/mysql/mysql.cnf mysql.cnf
+    cp /vagrant/configuration/etc/mysql/mysql.cnf mysql.cnf
 
 
     echo "======================================================"
@@ -268,11 +269,11 @@ Vagrant.configure("2") do |config|
         cd /etc/php/${dir}
         rm cli/php.ini
         rm fpm/php.ini
-        ln -s /vagrant/configuration/etc/php/${dir}/cli/php.ini cli/php.ini
-        ln -s /vagrant/configuration/etc/php/${dir}/fpm/php.ini fpm/php.ini
+        cp /vagrant/configuration/etc/php/${dir}/cli/php.ini cli/php.ini
+        cp /vagrant/configuration/etc/php/${dir}/fpm/php.ini fpm/php.ini
 
         rm -r fpm/pool.d
-        ln -s /vagrant/configuration/etc/php/${dir}/fpm/pool.d fpm/pool.d
+        cp -r /vagrant/configuration/etc/php/${dir}/fpm/pool.d fpm/pool.d
 
     done
 
@@ -340,11 +341,13 @@ Vagrant.configure("2") do |config|
     if [ -f "/lib/systemd/system/varnish.service" ]; then
         rm /lib/systemd/system/varnish.service
     fi
-    ln -s /vagrant/configuration/lib/systemd/system/varnish.service /lib/systemd/system/varnish.service
+    cp /vagrant/configuration/lib/systemd/system/varnish.service /lib/systemd/system/varnish.service
 
-    rm -r /etc/varnish
-    ln -s /vagrant/configuration/etc/varnish/ /etc/varnish
-    chmod 644 /etc/varnish/*.vcl
+    if [ -f "/etc/varnish/rkw.vcl" ]; then
+        rm /etc/varnish/rkw.vcl
+    fi
+    cp /vagrant/configuration/etc/varnish/rkw.vcl /etc/varnish/rkw.vcl
+    chmod 644 /etc/varnish/rkw.vcl
 
     systemctl daemon-reload
 
@@ -379,12 +382,13 @@ Vagrant.configure("2") do |config|
         if [ -f "/lib/systemd/system/mailcatcher.service" ]; then
             rm /lib/systemd/system/mailcatcher.service
         fi
-        ln -s /vagrant/configuration/lib/systemd/system/mailcatcher.service /lib/systemd/system/mailcatcher.service
+        cp /vagrant/configuration/lib/systemd/system/mailcatcher.service /lib/systemd/system/mailcatcher.service
         systemctl enable mailcatcher
 
     else
         echo "Mailcatcher already installed. Skipped."
     fi
+
 
     echo "======================================================"
     echo "Starting Services..."
@@ -398,7 +402,10 @@ Vagrant.configure("2") do |config|
     service apache2 start
 
     echo "...PHP 5.6..."
-     service php5.6-fpm start
+    service php5.6-fpm start
+
+    echo "...PHP 7.0..."
+    service php7.0-fpm start
 
     echo "...PHP 7.2..."
     service php7.2-fpm start
@@ -411,14 +418,6 @@ Vagrant.configure("2") do |config|
 
     echo "======================================================"
     echo "FINISHED!!!"
-    echo "======================================================"
-    echo "Go to http://<GUEST>:80 to reach the website"
-    echo "Go to http://<GUEST>/phpmadmin to call PhpMyAdmin"
-    echo "Go to http://<GUEST>:1080 to see all mails that have been sent by your VM"
-    echo "You can find out which IP your VM is using by calling 'netstat -rn' on your host and locking for the IP in 'vboxnet'."
-    echo "Use etc-hosts.txt to route local domains from your host to the IP of your VM."
-    echo "Root-password for Mysql on the VM is set to 'rkw'"
-    echo "Have fun!"
     echo "======================================================"
 
   SHELL

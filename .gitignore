@@ -9,6 +9,8 @@ bower_components
 .vagrant
 *.box
 *.log
+*.dpkg
+*.dpkg-new
 
 /.build
 /.buildpath
@@ -16,9 +18,13 @@ bower_components
 /.settings
 /.project
 
-/www/5.6/*
-!/www/5.6/public_html
-/www/7.0/*
-!/www/7.0/public_html
-/www/7.2/*
-!/www/7.2/public_html
+/vagrant/configuration/sites-available
+!/vagrant/configuration/sites-available/000-default.conf
+
+php5.6-fpm.conf
+php7.0-fpm.conf
+php7.2-fpm.conf
+
+/www/*
+!/www/default
+
