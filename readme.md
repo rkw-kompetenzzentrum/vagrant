@@ -4,6 +4,12 @@
 - Virtualbox, Version >= 5
 - Vagrant, Version >=2
 
+## Note
+This readme-file assumes that you use a proper operating system as host, like Mac OS or Linux.
+
+If you intend to use Windows as operating system for your host, you are totally on your own.
+Windows is not a proper operating system for web-development. **Use Windows at your own risk.**
+
 ## About the folders
 
 ### Folder `vagrant`
@@ -44,23 +50,33 @@ host$ vagrant halt
 ...and start it again with provision-flag (see below).
 
 ### Permissions with NFS
-If you use NFS (recommended for performance), Vagrant maps the user and group of the guest (`vagrant` with the UID 1000) to the same UIDs on the host. 
+For performance reasons this Vagrantfile uses NFS for mounting your working directory
+
+On mounting Vagrant maps the user and group of the guest (default for user and group: `vagrant` with UID 1000) to the same UIDs on the host. 
 In most cases this works fine. But if you have more than one user on the host it may happen that the UIDs do not match. 
 This causes problems with read and write permissions. 
 
+You can check your user's UIDs with this commands:
+```
+host$ id -u <USER_NAME>
+host$ id -u <GROUP_NAME>
+```
 
-
-Let's assume your host-user has the UID 502 and it's group has the UID 20.
-Then we uncomment the following lines to the Vagrantfile and enter the UIDs accordingly.
+Let's assume your host-user has the UID 501 and it's group has the UID 20.
+Then you have to set this values in the following lines to the Vagrantfile:
 ```
 config.nfs.map_uid = 501
 config.nfs.map_gid = 20
 ```
  
-Now we set the www-folder in this repository on the host to the matching user (if not already)
+Now we set the www-folder on the host to this user and group (if not already set)
 ```
 host$ sudo chown -R my-user:my-group www
 ```
+
+This way the permissions should be set correctly.
+
+**Please see also the troubleshooting section below for further help**
 
 ## Provisioning and initial setup
 You can do the provisioning of this Vagrant-VM by
@@ -202,27 +218,36 @@ Your are ready :-)
 
  # Troubleshooting (to be continued)
  ## NFS 
+
  ### On Mac
  Sometimes the NFS-directories simply don't mount.
  If you do a
-  ````
+ ```
  host$ vagrant up --debug
-   ````
+```
  you probably get the following messages:
- ````
+ ```
  DEBUG ssh: stderr: ttyname failed
  DEBUG ssh: stderr: Inappropriate ioctl for device
- ````
+ ```
  
  This may be the case because of wrong entries in `/etc/export` on your host, especially when you use more than one VM on your host.
  Just move the `/etc/export` to `/etc/export.bak` and start your VM again. 
  
  Also make sure you have the following entries in your host's `/etc/host`:
- ````
+ ```
  127.0.0.1	localhost
  255.255.255.255	broadcasthost
  ::1 localhost
  fe80::1%lo0	localhost
-  ````
+  ```
 See also: https://github.com/hashicorp/vagrant/issues/7646
    
+
+### If nothing helps at all
+You will find an alternative but not recommended way for mounting your working directory without NFS commented out in this Vagrantfile.
+```
+config.vm.synced_folder "../www", "/var/www", mount_options: ["dmode=777", "fmode=776"]
+```
+
+Other users recommend SSHFS as solution. **Be careful: we can offer no experience with this solution:** https://github.com/dustymabe/vagrant-sshfs
