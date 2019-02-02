@@ -49,8 +49,8 @@ host$ vagrant halt
 ```
 ...and start it again with provision-flag (see below).
 
-### Permissions with NFS
-For performance reasons this Vagrantfile uses NFS for mounting your working directory
+### NFS
+For performance reasons this Vagrantfile uses NFS for mounting your working directory.
 
 On mounting Vagrant maps the user and group of the guest (default for user and group: `vagrant` with UID 1000) to the same UIDs on the host. 
 In most cases this works fine. But if you have more than one user on the host it may happen that the UIDs do not match. 
