@@ -164,12 +164,15 @@ Taken this together a configuration for you project could look like this:
 </VirtualHost>
 ```
 
-Now we have to restart apache
+#### Step 3
+
+Now we have to activate the new configuration and reload apache 
 ```
+vm$ a2ensite my-project
 vm$ service apache2 restart
 ```
 
-#### Step 3
+#### Step 4
 Use the `etc/hosts` on your host to route your project's local domains from your host to the IP of your Vagrant VM.
 ou can find out which IP your VM is using by calling 
 ```
@@ -189,7 +192,7 @@ Set the IPs accordingly in your etc/hosts
 172.28.128.3	www.landingpage-for-my-project.local
 ``` 
 
-#### Step 4
+#### Step 5
 Your are ready :-)
 
 * Go to `http://your-project.local` to reach your project's DocumentRoot via Apache
@@ -197,8 +200,9 @@ Your are ready :-)
 * Go to `http://your-project.local:1080` to look into all e-mails that have been sent by your VM"
 
 
- # Troubleshooting
- ## On Mac
+ # Troubleshooting (to be continued)
+ ## NFS 
+ ### On Mac
  Sometimes the NFS-directories simply don't mount.
  If you do a
   ````
@@ -210,5 +214,15 @@ Your are ready :-)
  DEBUG ssh: stderr: Inappropriate ioctl for device
  ````
  
- This may be the case because of wrong entries in `/etc/export`, especially when you use more than one VM on your host.
- Just remove the relevant entries from `/etc/export` and start your VM again.
+ This may be the case because of wrong entries in `/etc/export` on your host, especially when you use more than one VM on your host.
+ Just move the `/etc/export` to `/etc/export.bak` and start your VM again. 
+ 
+ Also make sure you have the following entries in your host's `/etc/host`:
+ ````
+ 127.0.0.1	localhost
+ 255.255.255.255	broadcasthost
+ ::1 localhost
+ fe80::1%lo0	localhost
+  ````
+See also: https://github.com/hashicorp/vagrant/issues/7646
+   

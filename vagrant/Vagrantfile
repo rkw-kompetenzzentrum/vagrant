@@ -75,8 +75,7 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
-  # config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
-  config.vm.synced_folder "../www", "/var/www", mount_options: ['rw', 'vers=3', 'tcp', 'fsc', 'actimeo=2'], nfs: true
+  config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
   config.nfs.map_uid = 501
   config.nfs.map_gid = 210
 
@@ -144,21 +143,12 @@ Vagrant.configure("2") do |config|
         echo "Apache2 already installed."
     fi
 
-    echo "Set symlinks to configuration files..."
+    echo "Copy configuration files..."
     cd /etc/apache2
-    rm -r conf-available
     cp -r /vagrant/configuration/etc/apache2/conf-available conf-available
-
-    rm -r sites-available
-    cp -r /vagrant/configuration/etc/apache2/sites-available sites-available
-
-    rm apache2.conf
+    cp /vagrant/configuration/etc/apache2/sites-available/000-default.conf sites-available/000-default.conf
     cp /vagrant/configuration/etc/apache2/apache2.conf apache2.conf
-
-    rm envvars
     cp /vagrant/configuration/etc/apache2/envvars envvars
-
-    rm ports.conf
     cp /vagrant/configuration/etc/apache2/ports.conf ports.conf
 
     echo "Enabling/Disabling modules..."
@@ -198,7 +188,6 @@ Vagrant.configure("2") do |config|
 
     echo "Set symlinks to configuration files..."
     cd /etc/mysql
-    rm mysql.cnf
     cp /vagrant/configuration/etc/mysql/mysql.cnf mysql.cnf
 
 
@@ -261,19 +250,15 @@ Vagrant.configure("2") do |config|
     fi
 
 
-    echo "Set symlinks to configuration files..."
+    echo "Copy configuration files..."
     for dir in 5.6 7.0 7.2
     do
 
-    echo ${dir}
+        echo "Setting up ${dir}..."
 
         cd /etc/php/${dir}
-        rm cli/php.ini
-        rm fpm/php.ini
         cp /vagrant/configuration/etc/php/${dir}/cli/php.ini cli/php.ini
         cp /vagrant/configuration/etc/php/${dir}/fpm/php.ini fpm/php.ini
-
-        rm -r fpm/pool.d
         cp -r /vagrant/configuration/etc/php/${dir}/fpm/pool.d fpm/pool.d
 
     done
@@ -338,15 +323,8 @@ Vagrant.configure("2") do |config|
         echo "Varnish already installed. Skipped."
     fi
 
-    echo "Set symlinks to configuration files..."
-    if [ -f "/lib/systemd/system/varnish.service" ]; then
-        rm /lib/systemd/system/varnish.service
-    fi
+    echo "Copy configuration files..."
     cp /vagrant/configuration/lib/systemd/system/varnish.service /lib/systemd/system/varnish.service
-
-    if [ -f "/etc/varnish/rkw.vcl" ]; then
-        rm /etc/varnish/rkw.vcl
-    fi
     cp /vagrant/configuration/etc/varnish/rkw.vcl /etc/varnish/rkw.vcl
     chmod 644 /etc/varnish/rkw.vcl
 
@@ -379,10 +357,7 @@ Vagrant.configure("2") do |config|
         echo "Installing Mailcatcher..."
         gem install mailcatcher
 
-        echo "Set symlinks to configuration files..."
-        if [ -f "/lib/systemd/system/mailcatcher.service" ]; then
-            rm /lib/systemd/system/mailcatcher.service
-        fi
+        echo "Copy configuration files..."
         cp /vagrant/configuration/lib/systemd/system/mailcatcher.service /lib/systemd/system/mailcatcher.service
         systemctl enable mailcatcher
 
