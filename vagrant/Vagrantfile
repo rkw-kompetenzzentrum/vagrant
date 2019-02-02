@@ -367,8 +367,8 @@ Vagrant.configure("2") do |config|
 
     echo "======================================================"
     echo "Installing composer and expect..."
-    if [ ! -f "/usr/local/bin/composer" ]; then
-        curl -sS https://getcomposer.org/installer | sudo php-- --install-dir=/usr/local/bin --filename=composer
+    if [ ! -f "/usr/bin/composer" ]; then
+        curl -sS https://getcomposer.org/installer | sudo php-- --install-dir=/usr/bin --filename=composer
         apt-get install -y expect
     else
         echo "Composer and expect already installed. Skipped."
