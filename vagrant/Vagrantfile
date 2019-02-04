@@ -76,8 +76,8 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
   config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
-  config.nfs.map_uid = 501
-  config.nfs.map_gid = 210
+  config.nfs.map_uid = 1001
+  config.nfs.map_gid = 1001
 
   # config.vm.synced_folder "../www", "/var/www", mount_options: ["dmode=777", "fmode=776"]
 
@@ -127,6 +127,7 @@ Vagrant.configure("2") do |config|
     echo "Installing some basics"
     if [ ! -f "/var/log/vagrantfile-basics" ]; then
         apt-get install -y mc git debconf-utils
+        apt-get install -y curl
         touch /var/log/vagrantfile-basics
     else
         echo "Basics already installed. Skipped."
@@ -145,7 +146,7 @@ Vagrant.configure("2") do |config|
 
     echo "Copy configuration files..."
     cd /etc/apache2
-    cp -r /vagrant/configuration/etc/apache2/conf-available conf-available
+    cp /vagrant/configuration/etc/apache2/conf-available/* conf-available/
     cp /vagrant/configuration/etc/apache2/sites-available/000-default.conf sites-available/000-default.conf
     cp /vagrant/configuration/etc/apache2/apache2.conf apache2.conf
     cp /vagrant/configuration/etc/apache2/envvars envvars
@@ -273,7 +274,7 @@ Vagrant.configure("2") do |config|
         cd /etc/php/${dir}
         cp /vagrant/configuration/etc/php/${dir}/cli/php.ini cli/php.ini
         cp /vagrant/configuration/etc/php/${dir}/fpm/php.ini fpm/php.ini
-        cp -r /vagrant/configuration/etc/php/${dir}/fpm/pool.d fpm/pool.d
+        cp /vagrant/configuration/etc/php/${dir}/fpm/pool.d/* fpm/pool.d/
 
     done
 
@@ -382,7 +383,7 @@ Vagrant.configure("2") do |config|
     echo "======================================================"
     echo "Installing composer and expect..."
     if [ ! -f "/usr/bin/composer" ]; then
-        curl -sS https://getcomposer.org/installer | sudo php-- --install-dir=/usr/bin --filename=composer
+        curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/bin --filename=composer
         apt-get install -y expect
     else
         echo "Composer and expect already installed. Skipped."
