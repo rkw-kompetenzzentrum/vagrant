@@ -125,11 +125,12 @@ Vagrant.configure("2") do |config|
 
     echo "======================================================"
     echo "Set up Swap"
-    if [ ! -f "/var/log/vagrantfile-swap" ]; then
-        /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
-        /sbin/mkswap /var/swap.1
-        /sbin/swapon /var/swap.1
-        touch /var/log/vagrantfile-swap
+    if [ ! -f "/swapfile" ]; then
+        fallocate -l 2G /swapfile
+        chmod 600 /swapfile
+        mkswap /swapfile
+        swapon /swapfile
+        echo "/swapfile   none    swap    sw    0   0" >> /etc/fstab
     else
         echo "Swap already set up. Skipped."
     fi
