@@ -76,8 +76,8 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
   config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
-  config.nfs.map_uid = 1000
-  config.nfs.map_gid = 1000
+  config.nfs.map_uid = 1001
+  config.nfs.map_gid = 1001
 
   # config.vm.synced_folder "../www", "/var/www", mount_options: ["dmode=777", "fmode=776"]
 
