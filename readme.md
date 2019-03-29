@@ -82,6 +82,7 @@ This way the permissions should be set correctly.
 You can do the provisioning of this Vagrant-VM by
 ```
 host$ cd vagrant
+host$ cp Vagrantfile.default Vagrantfile
 host$ vagrant up --provision
 ```
 
