@@ -368,6 +368,7 @@ Vagrant.configure("2") do |config|
         service postfix stop
 
         echo "Setup of configuration files for Postfix..."
+        sed -i 's/relayhost/#relayhost/g' /etc/postfix/main.cf
         echo "relayhost = 127.0.0.1:1025" >> /etc/postfix/main.cf
     else
         echo "Postfix already installed. Skipped."
