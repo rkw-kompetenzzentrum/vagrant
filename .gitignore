@@ -28,4 +28,4 @@ php7.2-fpm.conf
 
 /www/*
 !/www/default
-
+!/www/html
