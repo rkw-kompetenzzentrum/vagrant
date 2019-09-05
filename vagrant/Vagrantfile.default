@@ -75,7 +75,8 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   # NFS (default) may be faster. NFS requires administration privileges (see: https://www.vagrantup.com/docs/synced-folders/nfs.html).
-  config.vm.synced_folder "../www", "/var/www", mount_options: ["nolock"], nfs: true
+  config.vm.synced_folder "../www", "/var/www", id: "www", mount_options: ["nolock"], nfs: true
+  config.vm.synced_folder "../tmp/surf", "/tmp/surf", id: "surf", mount_options: ["nolock"], nfs: true
   config.nfs.map_uid = 1001
   config.nfs.map_gid = 1001
 
@@ -133,6 +134,15 @@ Vagrant.configure("2") do |config|
         echo "/swapfile   none    swap    sw    0   0" >> /etc/fstab
     else
         echo "Swap already set up. Skipped."
+    fi
+
+    echo "======================================================"
+    echo "Set up temp-dir for surf"
+    if [ ! -f "/tmp/surf" ]; then
+        mkdir /tmp/surf
+        chmod 755 /tmp/surf
+    else
+        echo "Temp-dir for surf already set up. Skipped."
     fi
 
     echo "======================================================"
