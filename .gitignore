@@ -18,6 +18,11 @@ bower_components
 /.settings
 /.project
 
+/tmp/*
+!/tmp/.gitkeep
+/tmp/surf
+!/tmp/surf/.gitkeep
+
 /vagrant/Vagrantfile
 /vagrant/configuration/sites-available
 !/vagrant/configuration/sites-available/000-default.conf
