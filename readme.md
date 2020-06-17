@@ -52,6 +52,12 @@ host$ vagrant halt
 ### NFS
 For performance reasons this Vagrantfile uses NFS for mounting your working directory.
 
+Please make sure NFS-Server is installed on your host, before you start.
+For Linux:
+```
+sudo apt-get install nfs-kernel-server 
+```
+
 On mounting Vagrant maps the user and group of the guest (default for user and group: `vagrant` with UID 1000) to the same UIDs on the host. 
 In most cases this works fine. But if you have more than one user on the host it may happen that the UIDs do not match. 
 This causes problems with read and write permissions. 
