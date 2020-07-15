@@ -22,6 +22,8 @@ bower_components
 !/tmp/.gitkeep
 /tmp/surf
 !/tmp/surf/.gitkeep
+/tmp/cache
+!/tmp/cache/.gitkeep
 
 /vagrant/Vagrantfile
 /vagrant/configuration/sites-available
