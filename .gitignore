@@ -25,6 +25,7 @@ bower_components
 /tmp/cache
 !/tmp/cache/.gitkeep
 
+/vagrant/.idea
 /vagrant/Vagrantfile
 /vagrant/configuration/sites-available
 !/vagrant/configuration/sites-available/000-default.conf
@@ -35,4 +36,4 @@ php7.2-fpm.conf
 
 /www/*
 !/www/default
-
+!/www/html
