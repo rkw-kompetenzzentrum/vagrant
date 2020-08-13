@@ -78,6 +78,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../www", "/var/www", id: "www", mount_options: ["nolock"], nfs: true
   config.vm.synced_folder "../tmp/surf", "/tmp/surf", id: "surf", mount_options: ["nolock"], nfs: true
   config.vm.synced_folder "../tmp/cache", "/home/vagrant/.cache", id: "cache", mount_options: ["nolock"], nfs: true
+  config.vm.synced_folder "../tmp/npm", "/home/vagrant/.npm", id: "cache", mount_options: ["nolock"], nfs: true
 
   config.nfs.map_uid = 1001
   config.nfs.map_gid = 1001
