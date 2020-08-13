@@ -18,12 +18,13 @@ bower_components
 /.settings
 /.project
 
-/tmp/*
 !/tmp/.gitkeep
-/tmp/surf
+/tmp/surf/*
 !/tmp/surf/.gitkeep
-/tmp/cache
+/tmp/cache/*
 !/tmp/cache/.gitkeep
+/tmp/npm/*
+!/tmp/npm/.gitkeep
 
 /vagrant/.idea
 /vagrant/Vagrantfile
