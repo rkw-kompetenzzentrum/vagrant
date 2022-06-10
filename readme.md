@@ -65,7 +65,7 @@ This causes problems with read and write permissions.
 You can check your user's UIDs with this commands:
 ```
 host$ id -u <USER_NAME>
-host$ id -u <GROUP_NAME>
+host$ id -g <GROUP_NAME>
 ```
 
 Let's assume your host-user has the UID 501 and it's group has the UID 20.
